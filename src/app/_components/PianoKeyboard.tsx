@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Simplified WebMidi types
 interface MIDIPort {
@@ -22,12 +22,7 @@ const BASE_CHORD_COLOR = "#8B4513"; // Darker saddle brown color
 const getMIDINoteName = (midiNote: number): string => {
   const octave = Math.floor(midiNote / 12) - 2;
   const noteIndex = midiNote % 12;
-  return `${BASE_NOTES[noteIndex] || 'C'}${octave}`;
-};
-
-const getMajorChordNotes = (midiNote: number): string[] => {
-  const baseNote = midiNote % 12;
-  return [0, 4, 7].map(interval => BASE_NOTES[(baseNote + interval) % 12] || 'C');
+  return `${BASE_NOTES[noteIndex] ?? 'C'}${octave}`;
 };
 
 const getColorBrightness = (midiNote: number): string => {
@@ -49,7 +44,6 @@ const getColorBrightness = (midiNote: number): string => {
 
 // Component types
 interface KeyProps {
-  note: string;
   x: number;
   isBlack?: boolean;
   color?: string;
@@ -57,11 +51,11 @@ interface KeyProps {
 }
 
 // Components
-const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText }) => {
+const Key: React.FC<KeyProps> = ({ x, isBlack = false, color, displayText }) => {
   const width = isBlack ? 39 : 65; // 39 is 60% of 65
   const height = isBlack ? 150 : 256;
   const adjustedX = isBlack ? x - (width / 2) : x;
-  const fill = color || (isBlack ? "#111" : "#1a1a1a");
+  const fill = color ?? (isBlack ? "#111" : "#1a1a1a");
 
   return (
     <g>
@@ -81,7 +75,7 @@ const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText 
           x={adjustedX + width/2}
           y={height + 20}
           textAnchor="middle"
-          fill={color || "#666"}
+          fill={color ?? "#666"}
           fontSize="16"
           fontWeight="bold"
         >
@@ -158,7 +152,6 @@ const Dial: React.FC = () => {
 
 export const PianoKeyboard: React.FC = () => {
   const [keyColors, setKeyColors] = useState<Record<string, string>>({});
-  const [activeNotes, setActiveNotes] = useState<Set<number>>(new Set());
   const [midiDevice, setMidiDevice] = useState<string>("No MIDI device connected");
   const [lastPlayedNote, setLastPlayedNote] = useState<number | null>(null);
   const [noteDisplayText, setNoteDisplayText] = useState<Record<string, string>>({});
@@ -178,7 +171,7 @@ export const PianoKeyboard: React.FC = () => {
     { note: "B", x: 420, isBlack: false },
   ];
 
-  const handleMIDINote = (command: number, note: number, velocity: number) => {
+  const handleMIDINote = useCallback((command: number, note: number, velocity: number) => {
     const isNoteOn = command === 144 && velocity > 0;
     const isNoteOff = command === 128 || (command === 144 && velocity === 0);
     
@@ -187,43 +180,16 @@ export const PianoKeyboard: React.FC = () => {
       const baseNoteName = fullNoteName.slice(0, -1);
       const noteColor = getColorBrightness(note);
       
-      setActiveNotes(prev => new Set(prev).add(note));
       setLastPlayedNote(note);
       setNoteDisplayText(prev => ({ ...prev, [baseNoteName]: fullNoteName }));
-      
-      // Highlight just the pressed note with brightness based on octave
       setKeyColors(prev => ({ ...prev, [baseNoteName]: noteColor }));
     } 
-    else if (isNoteOff) {
-      setActiveNotes(prev => {
-        const updated = new Set(prev);
-        updated.delete(note);
-        
-        if (updated.size === 0) {
-          setKeyColors({});
-          setLastPlayedNote(null);
-          setNoteDisplayText({});
-        } 
-        else if (lastPlayedNote === note) {
-          // When releasing a note, keep other pressed notes highlighted
-          const remainingNotes = Array.from(updated);
-          const colors: Record<string, string> = {};
-          remainingNotes.forEach(noteNum => {
-            const noteName = getMIDINoteName(noteNum).slice(0, -1);
-            colors[noteName] = getColorBrightness(noteNum);
-          });
-          setKeyColors(colors);
-          
-          const lowestNote = Math.min(...remainingNotes);
-          const fullNoteName = getMIDINoteName(lowestNote);
-          setLastPlayedNote(lowestNote);
-          setNoteDisplayText({ [fullNoteName.slice(0, -1)]: fullNoteName });
-        }
-        
-        return updated;
-      });
+    else if (isNoteOff && lastPlayedNote === note) {
+      setKeyColors({});
+      setLastPlayedNote(null);
+      setNoteDisplayText({});
     }
-  };
+  }, [lastPlayedNote]);
 
   useEffect(() => {
     if (!('requestMIDIAccess' in navigator)) {
@@ -264,8 +230,10 @@ export const PianoKeyboard: React.FC = () => {
           };
         });
       })
-      .catch(err => setMidiDevice("No MIDI access"));
-  }, []);
+      .catch((_err) => {
+        setMidiDevice("Error accessing MIDI");
+      });
+  }, [handleMIDINote]);
 
   return (
     <div className="flex flex-col items-center gap-2">
