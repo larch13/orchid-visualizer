@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { Old_Standard_TT } from "next/font/google";
 import { type Metadata } from "next";
+import { Analytics } from '@vercel/analytics/react';
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable} ${oldStandardTT.variable}`}>
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
+        <Analytics />
       </body>
     </html>
   );
