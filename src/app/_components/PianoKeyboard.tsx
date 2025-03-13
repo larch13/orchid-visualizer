@@ -22,12 +22,7 @@ const BASE_CHORD_COLOR = "#8B4513"; // Darker saddle brown color
 const getMIDINoteName = (midiNote: number): string => {
   const octave = Math.floor(midiNote / 12) - 2;
   const noteIndex = midiNote % 12;
-  return `${BASE_NOTES[noteIndex] || 'C'}${octave}`;
-};
-
-const getMajorChordNotes = (midiNote: number): string[] => {
-  const baseNote = midiNote % 12;
-  return [0, 4, 7].map(interval => BASE_NOTES[(baseNote + interval) % 12] || 'C');
+  return `${BASE_NOTES[noteIndex] ?? 'C'}${octave}`;
 };
 
 const getColorBrightness = (midiNote: number): string => {
@@ -61,7 +56,7 @@ const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText 
   const width = isBlack ? 39 : 65; // 39 is 60% of 65
   const height = isBlack ? 150 : 256;
   const adjustedX = isBlack ? x - (width / 2) : x;
-  const fill = color || (isBlack ? "#111" : "#1a1a1a");
+  const fill = color ?? (isBlack ? "#111" : "#1a1a1a");
 
   return (
     <g>
@@ -81,7 +76,7 @@ const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText 
           x={adjustedX + width/2}
           y={height + 20}
           textAnchor="middle"
-          fill={color || "#666"}
+          fill={color ?? "#666"}
           fontSize="16"
           fontWeight="bold"
         >
