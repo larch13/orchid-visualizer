@@ -1,9 +1,17 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+import { Old_Standard_TT } from "next/font/google";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
+
+const oldStandardTT = Old_Standard_TT({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-old-standard',
+});
 
 export const metadata: Metadata = {
   title: "Orchid Voicing Viewer",
@@ -31,7 +39,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${oldStandardTT.variable}`}>
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>

@@ -106,11 +106,11 @@ const Dial: React.FC = () => {
           y={buttonY - buttonSize/2 + yOffset}
           width={buttonSize}
           height={buttonSize}
-          fill="#1a1a1a"
+          fill="#111"
           stroke="#000"
           strokeWidth="1"
           rx="6"
-          className="cursor-pointer hover:fill-neutral-800"
+          className="cursor-pointer hover:fill-neutral-900"
         />
         <text
           x={buttonStartX + (buttonSize + buttonGap) * index + 8}
@@ -133,19 +133,19 @@ const Dial: React.FC = () => {
         cx={centerX}
         cy={centerY}
         r={size}
-        fill="#1a1a1a"
+        fill="#111"
         stroke="#000"
         strokeWidth="1"
-        className="cursor-pointer hover:fill-neutral-800"
+        className="cursor-pointer hover:fill-neutral-900"
       />
       <circle
         cx={centerX}
         cy={centerY + size + 50}
         r={size * 0.45}
-        fill="#1a1a1a"
+        fill="#111"
         stroke="#000"
         strokeWidth="1"
-        className="cursor-pointer hover:fill-neutral-800"
+        className="cursor-pointer hover:fill-neutral-900"
       />
     </g>
   );
@@ -264,7 +264,7 @@ export const PianoKeyboard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="text-lg font-semibold text-white mb-2">{midiDevice}</div>
+      <div className="text-2xl font-semibold text-white mb-2 font-old-standard italic">{midiDevice}</div>
       <div className="relative">
         <svg width="850" height="300" viewBox="-520 0 1040 300">
           <Dial />
