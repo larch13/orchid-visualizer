@@ -79,8 +79,15 @@ const getChordName = (notes: number[]): ChordInfo | null => {
       ...intervals.slice(0, i).map(n => n + 12)
     ];
     
+    // Skip if rotatedIntervals is empty
+    if (rotatedIntervals.length === 0) continue;
+    
+    // Get the first interval and normalize all intervals relative to it
+    const firstInterval = rotatedIntervals[0];
+    if (firstInterval === undefined) continue;
+    
     // Normalize intervals to start from 0
-    const normalizedIntervals = rotatedIntervals.map(n => (n - rotatedIntervals[0] + 12) % 12);
+    const normalizedIntervals = rotatedIntervals.map(n => (n - firstInterval + 12) % 12);
     
     // Check against patterns
     for (const [chordType, inversions] of Object.entries(patterns)) {
