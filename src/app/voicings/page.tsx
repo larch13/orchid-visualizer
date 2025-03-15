@@ -52,7 +52,7 @@ const VoicingsPage: React.FC = () => {
             <thead>
               <tr className="bg-[#111]">
                 {WHOLE_NOTES.map((note) => (
-                  <th key={note} className="px-6 py-4 text-left text-sm font-bold text-gray-400">
+                  <th key={note} className="px-6 py-4 text-left text-sm font-bold text-gray-400 w-24">
                     {note}
                   </th>
                 ))}
@@ -73,7 +73,7 @@ const VoicingsPage: React.FC = () => {
                       return (
                         <td 
                           key={note} 
-                          className={`px-6 py-4 font-mono ${
+                          className={`px-6 py-4 font-mono w-24 ${
                             isFirstVoicing 
                               ? 'text-[#8B4513] font-medium' 
                               : 'text-gray-300'
