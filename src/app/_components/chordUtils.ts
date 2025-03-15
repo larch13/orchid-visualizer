@@ -270,4 +270,103 @@ export const getColorBrightness = (midiNote: number, baseColor: string): string 
   const newB = Math.min(255, Math.round(b * brightnessMultiplier));
   
   return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+};
+
+// Get chord notes for a specific voicing
+export const getChordNotes = (baseNote: string, voicing: number | undefined, quality: 'Maj' | 'Min' | 'Dim' | 'Sus'): string => {
+  if (voicing === undefined || voicing === null) return '-';
+  
+  // Find the base note index in the chromatic scale
+  const baseNoteIndex = BASE_NOTES.indexOf(baseNote as NoteName);
+  if (baseNoteIndex === -1) return '-';
+  
+  // Get the voicings array for this note
+  let voicings: number[] = [];
+  switch (quality) {
+    case 'Maj':
+      voicings = MAJOR_VOICINGS[baseNote] ?? [];
+      break;
+    case 'Min':
+      voicings = MINOR_VOICINGS[baseNote] ?? [];
+      break;
+    case 'Dim':
+      voicings = DIMINISHED_VOICINGS[baseNote] ?? [];
+      break;
+    case 'Sus':
+      voicings = SUS_VOICINGS[baseNote] ?? [];
+      break;
+  }
+  
+  if (!voicings.length) return '-';
+  
+  // Find the index of this voicing in the array
+  const voicingIndex = voicings.indexOf(voicing);
+  if (voicingIndex === -1) return '-';
+  
+  // The pattern repeats every 3 notes, shift by 1 so index 0 is first inversion
+  const pattern = ((voicingIndex + 1) % 3);
+  
+  // Get the correct intervals for this chord quality
+  let thirdInterval: number;
+  let fifthInterval: number;
+  
+  switch (quality) {
+    case 'Maj':
+      thirdInterval = 4; // Major third
+      fifthInterval = 7; // Perfect fifth
+      break;
+    case 'Min':
+      thirdInterval = 3; // Minor third
+      fifthInterval = 7; // Perfect fifth
+      break;
+    case 'Dim':
+      thirdInterval = 3; // Minor third
+      fifthInterval = 6; // Diminished fifth
+      break;
+    case 'Sus':
+      thirdInterval = 5; // Perfect fourth
+      fifthInterval = 7; // Perfect fifth
+      break;
+    default:
+      thirdInterval = 4;
+      fifthInterval = 7;
+  }
+  
+  // Calculate notes based on the pattern
+  let notes: string[] = [];
+  const third = BASE_NOTES[(baseNoteIndex + thirdInterval) % 12];
+  const fifth = BASE_NOTES[(baseNoteIndex + fifthInterval) % 12];
+  const root = BASE_NOTES[baseNoteIndex];
+  
+  if (!third || !fifth || !root) return '-';
+  
+  switch (pattern) {
+    case 0: // Root position: 1-3-5
+      notes = [root, third, fifth];
+      break;
+    case 1: // First inversion: 3-5-1
+      notes = [third, fifth, root];
+      break;
+    case 2: // Second inversion: 5-1-3
+      notes = [fifth, root, third];
+      break;
+  }
+  
+  return notes.join(' ');
+};
+
+// Get voicings for a specific chord quality
+export const getVoicingsForQuality = (quality: 'Maj' | 'Min' | 'Dim' | 'Sus'): Record<string, number[]> => {
+  switch (quality) {
+    case 'Maj':
+      return MAJOR_VOICINGS;
+    case 'Min':
+      return MINOR_VOICINGS;
+    case 'Dim':
+      return DIMINISHED_VOICINGS;
+    case 'Sus':
+      return SUS_VOICINGS;
+    default:
+      return MAJOR_VOICINGS;
+  }
 }; 

@@ -3,31 +3,14 @@
 import React, { useState } from "react";
 import type { NoteName } from '../_components/chordUtils';
 import {
-  MAJOR_VOICINGS,
-  MINOR_VOICINGS,
-  DIMINISHED_VOICINGS,
-  SUS_VOICINGS,
-  getFirstVoicing
+  getFirstVoicing,
+  getChordNotes,
+  getVoicingsForQuality
 } from "../_components/chordUtils";
 
 type ChordQuality = 'Dim' | 'Min' | 'Maj' | 'Sus';
 
 const WHOLE_NOTES: NoteName[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-
-const getVoicingsForQuality = (quality: ChordQuality): Record<string, number[]> => {
-  switch (quality) {
-    case 'Maj':
-      return MAJOR_VOICINGS;
-    case 'Min':
-      return MINOR_VOICINGS;
-    case 'Dim':
-      return DIMINISHED_VOICINGS;
-    case 'Sus':
-      return SUS_VOICINGS;
-    default:
-      return MAJOR_VOICINGS;
-  }
-};
 
 const VoicingsPage: React.FC = () => {
   const [selectedQuality, setSelectedQuality] = useState<ChordQuality>('Maj');
@@ -69,7 +52,7 @@ const VoicingsPage: React.FC = () => {
             <thead>
               <tr className="bg-[#111]">
                 {WHOLE_NOTES.map((note) => (
-                  <th key={note} className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+                  <th key={note} className="px-6 py-4 text-left text-sm font-bold text-gray-400">
                     {note}
                   </th>
                 ))}
@@ -77,7 +60,6 @@ const VoicingsPage: React.FC = () => {
             </thead>
             <tbody>
               {Array.from({ length: maxVoicings }, (_, i) => {
-                // Get first voicings for all notes to determine highlighting and filtering
                 const firstVoicings = WHOLE_NOTES.map(note => getFirstVoicing(voicings[note] ?? []));
                 
                 return (
@@ -97,7 +79,14 @@ const VoicingsPage: React.FC = () => {
                               : 'text-gray-300'
                           }`}
                         >
-                          {shouldShowDash ? '-' : (voicing ?? '-')}
+                          {shouldShowDash ? '-' : (
+                            <div>
+                              {isFirstVoicing ? <strong>1</strong> : voicing ?? '-'}
+                              <div className="text-xs text-gray-500">
+                                {getChordNotes(note, voicing, selectedQuality)}
+                              </div>
+                            </div>
+                          )}
                         </td>
                       );
                     })}
