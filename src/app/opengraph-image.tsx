@@ -49,7 +49,7 @@ export default async function Image() {
               marginBottom: '40px',
             }}
           >
-            {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((note, i) => (
+            {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((note, _i) => (
               <div
                 key={note}
                 style={{

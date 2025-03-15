@@ -91,7 +91,7 @@ const getChordName = (notes: number[]): ChordInfo | null => {
     
     // Check against patterns
     for (const [chordType, inversions] of Object.entries(patterns)) {
-      for (const [inversionIndex, pattern] of inversions.entries()) {
+      for (const [, pattern] of inversions.entries()) {
         if (!pattern) continue;
         
         if (normalizedIntervals.length === pattern.length && 
@@ -108,7 +108,6 @@ const getChordName = (notes: number[]): ChordInfo | null => {
             const rootBaseIndex = BASE_NOTES.indexOf(rootNote);
             if (rootBaseIndex !== lowestBaseIndex) {
               // Find which note in the pattern is the lowest note
-              const lowestNoteInPattern = pattern[0];
               const lowestNoteInterval = (lowestBaseIndex - rootBaseIndex + 12) % 12;
               actualInversionIndex = pattern.findIndex(interval => interval === lowestNoteInterval);
               if (actualInversionIndex === -1) actualInversionIndex = 0;
@@ -166,7 +165,7 @@ interface KeyProps {
 }
 
 // Components
-const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText }) => {
+const Key: React.FC<KeyProps> = ({ note: _note, x, isBlack = false, color, displayText }) => {
   const width = isBlack ? 39 : 65; // 39 is 60% of 65
   const height = isBlack ? 150 : 256;
   const adjustedX = isBlack ? x - (width / 2) : x;
@@ -278,9 +277,8 @@ const Dial: React.FC<DialProps> = ({ activeChordType }) => {
 
 export const PianoKeyboard: React.FC = () => {
   const [keyColors, setKeyColors] = useState<Record<string, string>>({});
-  const [activeNotes, setActiveNotes] = useState<Set<number>>(new Set());
+  const [, setActiveNotes] = useState<Set<number>>(new Set());
   const [midiDevice, setMidiDevice] = useState<string>("No MIDI device connected");
-  const [lastPlayedNote, setLastPlayedNote] = useState<number | null>(null);
   const [noteDisplayText, setNoteDisplayText] = useState<Record<string, string>>({});
   const [chordInfo, setChordInfo] = useState<ChordInfo | null>(null);
 
@@ -314,8 +312,6 @@ export const PianoKeyboard: React.FC = () => {
         const baseNoteName = fullNoteName.slice(0, -1);
         const noteColor = getColorBrightness(note);
         
-        // Update all related state in a single render cycle
-        setLastPlayedNote(note);
         setNoteDisplayText(prev => ({ ...prev, [baseNoteName]: fullNoteName }));
         setKeyColors(prev => ({ ...prev, [baseNoteName]: noteColor }));
         
@@ -330,30 +326,26 @@ export const PianoKeyboard: React.FC = () => {
         // Only update other state if there are no remaining notes
         if (updatedNotes.size === 0) {
           setKeyColors({});
-          setLastPlayedNote(null);
           setNoteDisplayText({});
           setChordInfo(null);
         } else {
           // Update to show all remaining notes
           const remainingNotes = Array.from(updatedNotes);
-          const lowestNote = Math.min(...remainingNotes);
           
           // Update display text for all remaining notes
           const newDisplayText: Record<string, string> = {};
-          remainingNotes.forEach(noteNum => {
-            const fullNoteName = getMIDINoteName(noteNum);
+          remainingNotes.forEach(note => {
+            const fullNoteName = getMIDINoteName(note);
             const baseNoteName = fullNoteName.slice(0, -1);
             newDisplayText[baseNoteName] = fullNoteName;
           });
           setNoteDisplayText(newDisplayText);
           
-          setLastPlayedNote(lowestNote);
-          
           // Update colors for all remaining notes
           const colors: Record<string, string> = {};
-          remainingNotes.forEach(noteNum => {
-            const noteName = getMIDINoteName(noteNum).slice(0, -1);
-            colors[noteName] = getColorBrightness(noteNum);
+          remainingNotes.forEach(note => {
+            const noteName = getMIDINoteName(note).slice(0, -1);
+            colors[noteName] = getColorBrightness(note);
           });
           setKeyColors(colors);
           
@@ -405,7 +397,7 @@ export const PianoKeyboard: React.FC = () => {
           };
         });
       })
-      .catch(err => setMidiDevice("No MIDI access"));
+      .catch(_err => setMidiDevice("No MIDI access"));
   }, []);
 
   // Extract chord type from chordInfo and map it to button labels
@@ -416,7 +408,7 @@ export const PianoKeyboard: React.FC = () => {
     ?.replace('Dominant', '')
     ?.replace('Sus4', 'Sus')
     ?.replace('Sus2', 'Sus')
-    || undefined;
+    ?? undefined;
 
   return (
     <div className="flex flex-col items-center gap-2">
