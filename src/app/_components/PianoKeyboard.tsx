@@ -72,7 +72,7 @@ const getChordName = (notes: number[]): ChordInfo | null => {
   const lowestBaseIndex = BASE_NOTES.indexOf(lowestBaseNote);
   
   // Try each note as the root
-  for (let i = 0; i < intervals.length; i++) {
+  for (const [i, rootIndex] of intervals.entries()) {
     // Rotate intervals to try each note as root
     const rotatedIntervals = [
       ...intervals.slice(i),
@@ -84,14 +84,12 @@ const getChordName = (notes: number[]): ChordInfo | null => {
     
     // Check against patterns
     for (const [chordType, inversions] of Object.entries(patterns)) {
-      for (let inversionIndex = 0; inversionIndex < inversions.length; inversionIndex++) {
-        const pattern = inversions[inversionIndex];
+      for (const [inversionIndex, pattern] of inversions.entries()) {
         if (!pattern) continue;
         
         if (normalizedIntervals.length === pattern.length && 
             normalizedIntervals.every((interval, j) => interval === pattern[j])) {
           // The root note is the one we rotated to
-          const rootIndex = intervals[i];
           if (typeof rootIndex === 'number' && rootIndex >= 0 && rootIndex < BASE_NOTES.length) {
             const rootNote = BASE_NOTES[rootIndex];
             if (!rootNote) continue;
