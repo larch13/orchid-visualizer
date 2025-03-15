@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { NoteName, ChordInfo } from './chordUtils';
+import {
+  getMIDINoteName,
+  getChordName,
+  getColorBrightness
+} from './chordUtils';
 
 // Simplified WebMidi types
 interface MIDIPort {
@@ -14,13 +20,6 @@ interface MIDIAccess {
   onstatechange: ((event: { port: MIDIPort }) => void) | null;
 }
 
-// Types
-type NoteName = typeof BASE_NOTES[number];
-type ChordType = 'Major' | 'Minor' | 'Diminished' | 'Augmented' | 'Major 7th' | 'Minor 7th' | 'Dominant 7th' | 'Sus4' | 'Sus2' | '6th' | '9th';
-type Inversion = number[];
-
-// Constants
-const BASE_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
 const BASE_CHORD_COLOR = "#8B4513"; // Darker saddle brown color
 
 const NOTES = [
@@ -37,137 +36,6 @@ const NOTES = [
   { note: "A#" as NoteName, x: 415, isBlack: true },
   { note: "B" as NoteName, x: 420, isBlack: false },
 ] as const;
-
-const CHORD_PATTERNS: Record<ChordType, Inversion[]> = {
-  'Major': [[0, 4, 7], [4, 7, 12], [7, 12, 16]], // Root, 1st, 2nd inversion
-  'Minor': [[0, 3, 7], [3, 7, 12], [7, 12, 15]], // Root, 1st, 2nd inversion
-  'Diminished': [[0, 3, 6], [3, 6, 9]], // Root, 1st inversion
-  'Augmented': [[0, 4, 8], [4, 8, 12]], // Root, 1st inversion
-  'Major 7th': [[0, 4, 7, 11], [4, 7, 11, 12], [7, 11, 12, 16], [11, 12, 16, 19]],
-  'Minor 7th': [[0, 3, 7, 10], [3, 7, 10, 12], [7, 10, 12, 15], [10, 12, 15, 19]],
-  'Dominant 7th': [[0, 4, 7, 10], [4, 7, 10, 12], [7, 10, 12, 16], [10, 12, 16, 19]],
-  'Sus4': [[0, 5, 7], [5, 7, 12]], // Root, 1st inversion
-  'Sus2': [[0, 2, 7], [2, 7, 12]], // Root, 1st inversion
-  '6th': [[0, 4, 7, 9], [4, 7, 9, 12], [7, 9, 12, 16]],
-  '9th': [[0, 4, 7, 10, 14], [4, 7, 10, 14, 16], [7, 10, 14, 16, 19]]
-} as const;
-
-// Utility functions
-const getMIDINoteName = (midiNote: number): string => {
-  const octave = Math.floor(midiNote / 12) - 2;
-  const noteIndex = midiNote % 12;
-  return `${BASE_NOTES[noteIndex] ?? 'C'}${octave}`;
-};
-
-const getBaseNoteName = (midiNote: number): NoteName => {
-  const noteIndex = midiNote % 12;
-  return BASE_NOTES[noteIndex] ?? 'C';
-};
-
-interface ChordInfo {
-  chordName: string;
-  inversion: string;
-  bassNote: string;
-}
-
-const getChordName = (notes: number[]): ChordInfo | null => {
-  if (notes.length < 2) return null;
-  
-  // Sort notes and get their base note names (without octave)
-  const baseNotes = notes.map(note => getBaseNoteName(note));
-  const uniqueNotes = [...new Set(baseNotes)];
-  
-  // Get intervals between notes
-  const intervals = uniqueNotes.map(note => {
-    const index = BASE_NOTES.indexOf(note);
-    return index >= 0 ? index : 0;
-  }).sort((a, b) => a - b);
-  
-  if (intervals.length === 0) return null;
-  
-  // Try each note as the root
-  for (const [i, rootIndex] of intervals.entries()) {
-    // Rotate intervals to try each note as root
-    const rotatedIntervals = [
-      ...intervals.slice(i),
-      ...intervals.slice(0, i).map(n => n + 12)
-    ];
-    
-    // Skip if rotatedIntervals is empty
-    if (rotatedIntervals.length === 0) continue;
-    
-    // Get the first interval and normalize all intervals relative to it
-    const firstInterval = rotatedIntervals[0];
-    if (firstInterval === undefined) continue;
-    
-    // Normalize intervals to start from 0
-    const normalizedIntervals = rotatedIntervals.map(n => (n - firstInterval + 12) % 12);
-    
-    // Check against patterns
-    for (const [chordType, inversions] of Object.entries(CHORD_PATTERNS)) {
-      for (const [, pattern] of inversions.entries()) {
-        if (!pattern) continue;
-        
-        if (normalizedIntervals.length === pattern.length && 
-            normalizedIntervals.every((interval, j) => interval === pattern[j])) {
-          // The root note is the one we rotated to
-          if (typeof rootIndex === 'number' && rootIndex >= 0 && rootIndex < BASE_NOTES.length) {
-            const rootNote = BASE_NOTES[rootIndex];
-            if (!rootNote) continue;
-            
-            const lowestNoteName = getMIDINoteName(Math.min(...notes));
-            
-            // Determine the actual inversion based on the lowest note
-            let actualInversionIndex = 0;
-            const rootBaseIndex = BASE_NOTES.indexOf(rootNote);
-            if (rootBaseIndex !== intervals[0] && intervals[0] !== undefined) {
-              // Find which note in the pattern is the lowest note
-              const lowestNoteInterval = (intervals[0] - rootBaseIndex + 12) % 12;
-              actualInversionIndex = pattern.findIndex(interval => interval === lowestNoteInterval);
-              if (actualInversionIndex === -1) actualInversionIndex = 0;
-            }
-            
-            // Determine inversion text
-            let inversionText = 'Root';
-            if (actualInversionIndex === 1) {
-              inversionText = '1st';
-            } else if (actualInversionIndex === 2) {
-              inversionText = '2nd';
-            } else if (actualInversionIndex === 3) {
-              inversionText = '3rd';
-            }
-            
-            return {
-              chordName: `${rootNote} ${chordType}`,
-              inversion: inversionText,
-              bassNote: lowestNoteName
-            };
-          }
-        }
-      }
-    }
-  }
-  
-  // If no pattern matches, return null
-  return null;
-}
-
-const getColorBrightness = (midiNote: number): string => {
-  const octave = Math.floor(midiNote / 12) - 2;
-  const baseColor = parseInt(BASE_CHORD_COLOR.slice(1), 16);
-  const r = ((baseColor >> 16) & 255);
-  const g = ((baseColor >> 8) & 255);
-  const b = (baseColor & 255);
-  
-  // Increase brightness based on octave (0-7 range typically for MIDI)
-  const brightnessMultiplier = 1 + (octave * 0.3); // 30% brighter per octave
-  
-  const newR = Math.min(255, Math.round(r * brightnessMultiplier));
-  const newG = Math.min(255, Math.round(g * brightnessMultiplier));
-  const newB = Math.min(255, Math.round(b * brightnessMultiplier));
-  
-  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-};
 
 // Component types
 interface KeyProps {
@@ -305,7 +173,7 @@ export const PianoKeyboard: React.FC = () => {
       const fullNoteName = getMIDINoteName(note);
       const baseNoteName = fullNoteName.slice(0, -1);
       newDisplayText[baseNoteName] = fullNoteName;
-      newColors[baseNoteName] = getColorBrightness(note);
+      newColors[baseNoteName] = getColorBrightness(note, BASE_CHORD_COLOR);
     });
 
     setNoteDisplayText(newDisplayText);
@@ -321,10 +189,8 @@ export const PianoKeyboard: React.FC = () => {
       const updatedNotes = new Set(prev);
       
       if (isNoteOn) {
-        console.log(`Note On: ${getMIDINoteName(note)} (${note}) velocity: ${velocity}`);
         updatedNotes.add(note);
       } else if (isNoteOff) {
-        console.log(`Note Off: ${getMIDINoteName(note)} (${note})`);
         updatedNotes.delete(note);
       }
 

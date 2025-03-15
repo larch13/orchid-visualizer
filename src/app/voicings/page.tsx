@@ -1,0 +1,115 @@
+"use client";
+
+import React, { useState } from "react";
+import type { NoteName } from '../_components/chordUtils';
+import {
+  MAJOR_VOICINGS,
+  MINOR_VOICINGS,
+  DIMINISHED_VOICINGS,
+  SUS_VOICINGS,
+  getFirstVoicing
+} from "../_components/chordUtils";
+
+type ChordQuality = 'Dim' | 'Min' | 'Maj' | 'Sus';
+
+const WHOLE_NOTES: NoteName[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+
+const getVoicingsForQuality = (quality: ChordQuality): Record<string, number[]> => {
+  switch (quality) {
+    case 'Maj':
+      return MAJOR_VOICINGS;
+    case 'Min':
+      return MINOR_VOICINGS;
+    case 'Dim':
+      return DIMINISHED_VOICINGS;
+    case 'Sus':
+      return SUS_VOICINGS;
+    default:
+      return MAJOR_VOICINGS;
+  }
+};
+
+const VoicingsPage: React.FC = () => {
+  const [selectedQuality, setSelectedQuality] = useState<ChordQuality>('Maj');
+  const voicings = getVoicingsForQuality(selectedQuality);
+
+  // Find the maximum number of voicings across all notes
+  const maxVoicings = Math.max(...WHOLE_NOTES.map(note => (voicings[note] ?? []).length));
+
+  return (
+    <div className="p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 font-old-standard italic">Chord Voicings</h1>
+        
+        <div className="mb-8">
+          <label className="block text-sm font-medium text-gray-400 mb-2">
+            Select Chord Quality
+          </label>
+          <div className="inline-flex rounded-lg bg-[#1a1a1a] p-1">
+            {(['Dim', 'Min', 'Maj', 'Sus'] as ChordQuality[]).map((quality) => (
+              <button
+                key={quality}
+                onClick={() => setSelectedQuality(quality)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  selectedQuality === quality
+                    ? 'bg-[#8B4513] text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-[#222]'
+                }`}
+              >
+                {quality === 'Dim' ? 'Diminished' : 
+                 quality === 'Min' ? 'Minor' : 
+                 quality === 'Maj' ? 'Major' : 'Suspended'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border border-gray-700">
+          <table className="min-w-full bg-[#1a1a1a]">
+            <thead>
+              <tr className="bg-[#111]">
+                {WHOLE_NOTES.map((note) => (
+                  <th key={note} className="px-6 py-4 text-left text-sm font-medium text-gray-400">
+                    {note}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: maxVoicings }, (_, i) => {
+                // Get first voicings for all notes to determine highlighting and filtering
+                const firstVoicings = WHOLE_NOTES.map(note => getFirstVoicing(voicings[note] ?? []));
+                
+                return (
+                  <tr key={i} className="border-t border-gray-700 hover:bg-[#222] transition-colors">
+                    {WHOLE_NOTES.map((note, noteIndex) => {
+                      const voicing = voicings[note]?.[i];
+                      const firstVoicing = firstVoicings[noteIndex] ?? null;
+                      const isFirstVoicing = voicing === firstVoicing;
+                      const shouldShowDash = voicing !== undefined && firstVoicing !== null && voicing < firstVoicing;
+                      
+                      return (
+                        <td 
+                          key={note} 
+                          className={`px-6 py-4 font-mono ${
+                            isFirstVoicing 
+                              ? 'text-[#8B4513] font-medium' 
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          {shouldShowDash ? '-' : (voicing ?? '-')}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VoicingsPage; 
