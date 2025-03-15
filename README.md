@@ -1,29 +1,96 @@
-# Create T3 App
+# Orchid Visualizer
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+**Orchid Visualizer** is an open-source community project designed to enhance your experience with the [Telepathic Instruments Orchid](https://telepathicinstruments.com/). This tool helps you explore and visualize the capabilities of this amazing device, making it easier to interact with and understand its features.  
 
-## What's next? How do I make an app with this?
+![Orchid Virtual Keyboard](assets/virtual-keyboard.png)
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## 🌟 Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### Virtual Keyboard Display
+Highlights the notes and chords pressed on your keyboard, providing a clear, real-time visual representation.
 
-## Learn More
+### Chord Quality Identification:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+Detects and highlights the specific chord quality being played (e.g., minor, major, diminished).
+### Detailed Chord Information
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+Displays comprehensive text details including:
+* Chord Name: e.g., C minor
+* Inversion: e.g., Root, First, or Second
+* Bass Note and Octave: e.g., D1
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### Voicing Numbers Page:
 
-## How do I deploy this?
+Offers a separate view where users can explore all voicing numbers used by the synth. This page includes:
+* Tabs for different chord qualities (Dim, Min, Maj, and Sus)
+* A breakdown of each voicing with the corresponding notes
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## 🚀 Tech Stack
+- [T3 Stack](https://create.t3.gg/)
+    - [Next.js](https://nextjs.org) - React framework for production
+    - [TypeScript](https://www.typescriptlang.org/) - Type safety
+    - [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+
+## 📋 Prerequisites
+
+- Node.js 18.x or later
+- npm 10.x or later
+
+## 🛠️ Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/orchid.git
+cd orchid
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Copy the example environment file
+```bash
+cp .env.example .env
+```
+
+4. Update the environment variables in `.env` with your values
+
+5. Start the development server
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:3000`
+
+## 🧪 Running Tests
+
+```bash
+npm run typecheck    # Run TypeScript checks
+npm run lint        # Run ESLint
+npm run format:check # Check code formatting
+```
+
+## 🚀 Deployment
+This project is automatically deployed using [Vercel](https://vercel.com) when changes are merged into the `main` branch.
+
+
+## 👥 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and contribute to the project.
+
+
+## ![Telepathic Instruments Community Discord](public/favicon.ico) Telepathic Instruments Community Discord
+Join us here: [![Discord](https://img.shields.io/discord/1344898163898585138?logo=discord&color=5865F2)](https://discord.gg/m23GeqeS8D)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [T3 Stack](https://create.t3.gg/) for the amazing application stack
+- All our contributors and supporters
