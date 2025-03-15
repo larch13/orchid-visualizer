@@ -7,17 +7,17 @@ const Navigation = () => {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-[#111] border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+    <nav className="border-b border-gray-800 bg-[#111]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex space-x-8">
               <Link
                 href="/"
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
                   pathname === "/"
-                    ? "text-[#8B4513] border-b-2 border-[#8B4513]"
-                    : "text-gray-400 hover:text-white hover:border-b-2 hover:border-gray-700 border-b-2 border-transparent"
+                    ? "border-b-2 border-[#8B4513] text-[#8B4513]"
+                    : "border-b-2 border-transparent text-gray-400 hover:border-b-2 hover:border-gray-700 hover:text-white"
                 }`}
               >
                 Visualizer
@@ -26,8 +26,8 @@ const Navigation = () => {
                 href="/voicings"
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
                   pathname === "/voicings"
-                    ? "text-[#8B4513] border-b-2 border-[#8B4513]"
-                    : "text-gray-400 hover:text-white hover:border-b-2 hover:border-gray-700 border-b-2 border-transparent"
+                    ? "border-b-2 border-[#8B4513] text-[#8B4513]"
+                    : "border-b-2 border-transparent text-gray-400 hover:border-b-2 hover:border-gray-700 hover:text-white"
                 }`}
               >
                 Voicings
@@ -40,4 +40,4 @@ const Navigation = () => {
   );
 };
 
-export default Navigation; 
+export default Navigation;

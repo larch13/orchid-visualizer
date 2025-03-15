@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Footer: React.FC = () => {
   return (
@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
         href="https://discord.gg/m23GeqeS8D"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 rounded-lg bg-[#5865F2] px-4 py-2 font-medium text-white hover:bg-[#4752C4] transition-colors"
+        className="flex items-center gap-2 rounded-lg bg-[#5865F2] px-4 py-2 font-medium text-white transition-colors hover:bg-[#4752C4]"
       >
         <svg
           width="24"
@@ -20,11 +20,11 @@ const Footer: React.FC = () => {
         </svg>
         <div className="flex flex-col">
           <span>Telepathic Instruments Discord</span>
-          <span className="text-xs -mt-1">Community Edition</span>
+          <span className="-mt-1 text-xs">Community Edition</span>
         </div>
       </a>
     </footer>
   );
 };
 
-export default Footer; 
+export default Footer;

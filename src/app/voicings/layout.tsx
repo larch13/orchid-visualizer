@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Orchid Voicings',
+  title: "Orchid Voicings",
 };
 
 export default function VoicingsLayout({
@@ -8,4 +8,4 @@ export default function VoicingsLayout({
   children: React.ReactNode;
 }) {
   return <>{children}</>;
-} 
+}
