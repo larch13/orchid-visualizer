@@ -25,6 +25,115 @@ const getMIDINoteName = (midiNote: number): string => {
   return `${BASE_NOTES[noteIndex] ?? 'C'}${octave}`;
 };
 
+const getBaseNoteName = (midiNote: number): string => {
+  const noteIndex = midiNote % 12;
+  return BASE_NOTES[noteIndex] ?? 'C';
+};
+
+interface ChordInfo {
+  chordName: string;
+  inversion: string;
+  bassNote: string;
+}
+
+const getChordName = (notes: number[]): ChordInfo | null => {
+  if (notes.length < 2) return null;
+  
+  // Sort notes and get their base note names (without octave)
+  const baseNotes = notes.map(note => getBaseNoteName(note));
+  const uniqueNotes = [...new Set(baseNotes)];
+  
+  // Get intervals between notes
+  const intervals = uniqueNotes.map(note => {
+    const index = BASE_NOTES.indexOf(note);
+    return index >= 0 ? index : 0;
+  }).sort((a, b) => a - b);
+  
+  if (intervals.length === 0) return null;
+  
+  // Common chord patterns (including inversions)
+  const patterns = {
+    'Major': [[0, 4, 7], [4, 7, 12], [7, 12, 16]], // Root, 1st, 2nd inversion
+    'Minor': [[0, 3, 7], [3, 7, 12], [7, 12, 15]], // Root, 1st, 2nd inversion
+    'Diminished': [[0, 3, 6], [3, 6, 9]], // Root, 1st inversion
+    'Augmented': [[0, 4, 8], [4, 8, 12]], // Root, 1st inversion
+    'Major 7th': [[0, 4, 7, 11], [4, 7, 11, 12], [7, 11, 12, 16], [11, 12, 16, 19]],
+    'Minor 7th': [[0, 3, 7, 10], [3, 7, 10, 12], [7, 10, 12, 15], [10, 12, 15, 19]],
+    'Dominant 7th': [[0, 4, 7, 10], [4, 7, 10, 12], [7, 10, 12, 16], [10, 12, 16, 19]],
+    'Sus4': [[0, 5, 7], [5, 7, 12]], // Root, 1st inversion
+    'Sus2': [[0, 2, 7], [2, 7, 12]], // Root, 1st inversion
+    '6th': [[0, 4, 7, 9], [4, 7, 9, 12], [7, 9, 12, 16]],
+    '9th': [[0, 4, 7, 10, 14], [4, 7, 10, 14, 16], [7, 10, 14, 16, 19]]
+  };
+  
+  // Find the lowest note and its base note name
+  const lowestNote = Math.min(...notes);
+  const lowestBaseNote = getBaseNoteName(lowestNote);
+  const lowestBaseIndex = BASE_NOTES.indexOf(lowestBaseNote);
+  
+  // Try each note as the root
+  for (let i = 0; i < intervals.length; i++) {
+    // Rotate intervals to try each note as root
+    const rotatedIntervals = [
+      ...intervals.slice(i),
+      ...intervals.slice(0, i).map(n => n + 12)
+    ];
+    
+    // Normalize intervals to start from 0
+    const normalizedIntervals = rotatedIntervals.map(n => (n - rotatedIntervals[0] + 12) % 12);
+    
+    // Check against patterns
+    for (const [chordType, inversions] of Object.entries(patterns)) {
+      for (let inversionIndex = 0; inversionIndex < inversions.length; inversionIndex++) {
+        const pattern = inversions[inversionIndex];
+        if (!pattern) continue;
+        
+        if (normalizedIntervals.length === pattern.length && 
+            normalizedIntervals.every((interval, j) => interval === pattern[j])) {
+          // The root note is the one we rotated to
+          const rootIndex = intervals[i];
+          if (typeof rootIndex === 'number' && rootIndex >= 0 && rootIndex < BASE_NOTES.length) {
+            const rootNote = BASE_NOTES[rootIndex];
+            if (!rootNote) continue;
+            
+            const lowestNoteName = getMIDINoteName(lowestNote);
+            
+            // Determine the actual inversion based on the lowest note
+            let actualInversionIndex = 0;
+            const rootBaseIndex = BASE_NOTES.indexOf(rootNote);
+            if (rootBaseIndex !== lowestBaseIndex) {
+              // Find which note in the pattern is the lowest note
+              const lowestNoteInPattern = pattern[0];
+              const lowestNoteInterval = (lowestBaseIndex - rootBaseIndex + 12) % 12;
+              actualInversionIndex = pattern.findIndex(interval => interval === lowestNoteInterval);
+              if (actualInversionIndex === -1) actualInversionIndex = 0;
+            }
+            
+            // Determine inversion text
+            let inversionText = 'Root';
+            if (actualInversionIndex === 1) {
+              inversionText = '1st';
+            } else if (actualInversionIndex === 2) {
+              inversionText = '2nd';
+            } else if (actualInversionIndex === 3) {
+              inversionText = '3rd';
+            }
+            
+            return {
+              chordName: `${rootNote} ${chordType}`,
+              inversion: inversionText,
+              bassNote: lowestNoteName
+            };
+          }
+        }
+      }
+    }
+  }
+  
+  // If no pattern matches, return null
+  return null;
+}
+
 const getColorBrightness = (midiNote: number): string => {
   const octave = Math.floor(midiNote / 12) - 2;
   const baseColor = parseInt(BASE_CHORD_COLOR.slice(1), 16);
@@ -157,6 +266,7 @@ export const PianoKeyboard: React.FC = () => {
   const [midiDevice, setMidiDevice] = useState<string>("No MIDI device connected");
   const [lastPlayedNote, setLastPlayedNote] = useState<number | null>(null);
   const [noteDisplayText, setNoteDisplayText] = useState<Record<string, string>>({});
+  const [chordInfo, setChordInfo] = useState<ChordInfo | null>(null);
 
   const notes = [
     { note: "C", x: 0, isBlack: false },
@@ -192,6 +302,10 @@ export const PianoKeyboard: React.FC = () => {
         setLastPlayedNote(note);
         setNoteDisplayText(prev => ({ ...prev, [baseNoteName]: fullNoteName }));
         setKeyColors(prev => ({ ...prev, [baseNoteName]: noteColor }));
+        
+        // Update chord info after adding the note
+        const notesArray = Array.from(updatedNotes);
+        setChordInfo(getChordName(notesArray));
       } 
       else if (isNoteOff) {
         console.log(`Note Off: ${getMIDINoteName(note)} (${note})`);
@@ -202,6 +316,7 @@ export const PianoKeyboard: React.FC = () => {
           setKeyColors({});
           setLastPlayedNote(null);
           setNoteDisplayText({});
+          setChordInfo(null);
         } else {
           // Update to show all remaining notes
           const remainingNotes = Array.from(updatedNotes);
@@ -225,6 +340,9 @@ export const PianoKeyboard: React.FC = () => {
             colors[noteName] = getColorBrightness(noteNum);
           });
           setKeyColors(colors);
+          
+          // Update chord info with remaining notes
+          setChordInfo(getChordName(remainingNotes));
         }
       }
       
@@ -278,8 +396,29 @@ export const PianoKeyboard: React.FC = () => {
     <div className="flex flex-col items-center gap-2">
       <div className="text-2xl font-semibold text-white mb-2 font-old-standard italic">{midiDevice}</div>
       <div className="relative">
-        <svg width="850" height="300" viewBox="-520 0 1040 300">
+        <svg width="850" height="330" viewBox="-520 0 1040 300">
           <Dial />
+          <g>
+            {/* Table header - always shown */}
+            <text x="0" y="-40" textAnchor="start" fill="#666" fontSize="12">Chord</text>
+            <text x="125" y="-40" textAnchor="start" fill="#666" fontSize="12">Inversion</text>
+            <text x="250" y="-40" textAnchor="start" fill="#666" fontSize="12">Bass</text>
+            
+            {/* Table content - only shown when chordInfo exists */}
+            {chordInfo && (
+              <>
+                <text x="0" y="-20" textAnchor="start" fill="white" fontSize="14" className="font-medium">
+                  {chordInfo.chordName}
+                </text>
+                <text x="125" y="-20" textAnchor="start" fill="white" fontSize="14" className="font-medium">
+                  {chordInfo.inversion}
+                </text>
+                <text x="250" y="-20" textAnchor="start" fill="white" fontSize="14" className="font-medium">
+                  {chordInfo.bassNote}
+                </text>
+              </>
+            )}
+          </g>
           {notes
             .filter(note => !note.isBlack)
             .map(note => (
