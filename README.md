@@ -2,7 +2,10 @@
 
 **Orchid Visualizer** is an open-source community project designed to enhance your experience with the [Telepathic Instruments Orchid](https://telepathicinstruments.com/). This tool helps you explore and visualize the capabilities of this amazing device, making it easier to interact with and understand its features.  
 
-![Orchid Virtual Keyboard](assets/virtual-keyboard.png)
+### Try it out: [https://orchid.synthsonic.app](https://orchid.synthsonic.app)
+
+
+### ![Orchid Virtual Keyboard](assets/virtual-keyboard.png)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
