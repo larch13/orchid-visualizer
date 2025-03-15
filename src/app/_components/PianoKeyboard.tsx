@@ -177,47 +177,59 @@ export const PianoKeyboard: React.FC = () => {
     const isNoteOn = command === 144 && velocity > 0;
     const isNoteOff = command === 128 || (command === 144 && velocity === 0);
     
-    if (isNoteOn) {
-      const fullNoteName = getMIDINoteName(note);
-      const baseNoteName = fullNoteName.slice(0, -1);
-      const noteColor = getColorBrightness(note);
+    setActiveNotes(prev => {
+      const updatedNotes = new Set(prev);
       
-      setActiveNotes(prev => new Set(prev).add(note));
-      setLastPlayedNote(note);
-      setNoteDisplayText(prev => ({ ...prev, [baseNoteName]: fullNoteName }));
-      
-      // Highlight just the pressed note with brightness based on octave
-      setKeyColors(prev => ({ ...prev, [baseNoteName]: noteColor }));
-    } 
-    else if (isNoteOff) {
-      setActiveNotes(prev => {
-        const updated = new Set(prev);
-        updated.delete(note);
+      if (isNoteOn) {
+        console.log(`Note On: ${getMIDINoteName(note)} (${note}) velocity: ${velocity}`);
+        updatedNotes.add(note);
         
-        if (updated.size === 0) {
+        const fullNoteName = getMIDINoteName(note);
+        const baseNoteName = fullNoteName.slice(0, -1);
+        const noteColor = getColorBrightness(note);
+        
+        // Update all related state in a single render cycle
+        setLastPlayedNote(note);
+        setNoteDisplayText(prev => ({ ...prev, [baseNoteName]: fullNoteName }));
+        setKeyColors(prev => ({ ...prev, [baseNoteName]: noteColor }));
+      } 
+      else if (isNoteOff) {
+        console.log(`Note Off: ${getMIDINoteName(note)} (${note})`);
+        updatedNotes.delete(note);
+        
+        // Only update other state if there are no remaining notes
+        if (updatedNotes.size === 0) {
           setKeyColors({});
           setLastPlayedNote(null);
           setNoteDisplayText({});
-        } 
-        else if (lastPlayedNote === note) {
-          // When releasing a note, keep other pressed notes highlighted
-          const remainingNotes = Array.from(updated);
+        } else {
+          // Update to show all remaining notes
+          const remainingNotes = Array.from(updatedNotes);
+          const lowestNote = Math.min(...remainingNotes);
+          
+          // Update display text for all remaining notes
+          const newDisplayText: Record<string, string> = {};
+          remainingNotes.forEach(noteNum => {
+            const fullNoteName = getMIDINoteName(noteNum);
+            const baseNoteName = fullNoteName.slice(0, -1);
+            newDisplayText[baseNoteName] = fullNoteName;
+          });
+          setNoteDisplayText(newDisplayText);
+          
+          setLastPlayedNote(lowestNote);
+          
+          // Update colors for all remaining notes
           const colors: Record<string, string> = {};
           remainingNotes.forEach(noteNum => {
             const noteName = getMIDINoteName(noteNum).slice(0, -1);
             colors[noteName] = getColorBrightness(noteNum);
           });
           setKeyColors(colors);
-          
-          const lowestNote = Math.min(...remainingNotes);
-          const fullNoteName = getMIDINoteName(lowestNote);
-          setLastPlayedNote(lowestNote);
-          setNoteDisplayText({ [fullNoteName.slice(0, -1)]: fullNoteName });
         }
-        
-        return updated;
-      });
-    }
+      }
+      
+      return updatedNotes;
+    });
   };
 
   useEffect(() => {
