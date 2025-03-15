@@ -201,7 +201,11 @@ const Key: React.FC<KeyProps> = ({ note, x, isBlack = false, color, displayText 
   );
 };
 
-const Dial: React.FC = () => {
+interface DialProps {
+  activeChordType?: string;
+}
+
+const Dial: React.FC<DialProps> = ({ activeChordType }) => {
   const size = 60;
   const centerX = -80;
   const centerY = 88;
@@ -213,30 +217,37 @@ const Dial: React.FC = () => {
   const labelY = buttonY - buttonSize/2 + 28;
 
   const renderButtons = (labels: string[], yOffset: number) => (
-    labels.map((label, index) => (
-      <g key={label}>
-        <rect
-          x={buttonStartX + (buttonSize + buttonGap) * index}
-          y={buttonY - buttonSize/2 + yOffset}
-          width={buttonSize}
-          height={buttonSize}
-          fill="#111"
-          stroke="#000"
-          strokeWidth="1"
-          rx="6"
-          className="cursor-pointer hover:fill-neutral-900"
-        />
-        <text
-          x={buttonStartX + (buttonSize + buttonGap) * index + 8}
-          y={labelY + yOffset}
-          textAnchor="start"
-          fill="#666"
-          fontSize="14"
-        >
-          {label}
-        </text>
-      </g>
-    ))
+    labels.map((label, index) => {
+      const isActive = activeChordType && (
+        (yOffset < 0 && label === activeChordType) || // Top row
+        (yOffset > 0 && label === activeChordType)    // Bottom row
+      );
+      
+      return (
+        <g key={label}>
+          <rect
+            x={buttonStartX + (buttonSize + buttonGap) * index}
+            y={buttonY - buttonSize/2 + yOffset}
+            width={buttonSize}
+            height={buttonSize}
+            fill={isActive ? "#8B4513" : "#111"}
+            stroke="#000"
+            strokeWidth="1"
+            rx="6"
+            className="cursor-pointer hover:fill-neutral-900"
+          />
+          <text
+            x={buttonStartX + (buttonSize + buttonGap) * index + 8}
+            y={labelY + yOffset}
+            textAnchor="start"
+            fill={isActive ? "white" : "#666"}
+            fontSize="14"
+          >
+            {label}
+          </text>
+        </g>
+      );
+    })
   );
 
   return (
@@ -397,12 +408,22 @@ export const PianoKeyboard: React.FC = () => {
       .catch(err => setMidiDevice("No MIDI access"));
   }, []);
 
+  // Extract chord type from chordInfo and map it to button labels
+  const activeChordType = chordInfo?.chordName.split(' ')[1]?.replace('7th', '7')
+    ?.replace('Major', 'Maj')
+    ?.replace('Minor', 'Min')
+    ?.replace('Diminished', 'Dim')
+    ?.replace('Dominant', '')
+    ?.replace('Sus4', 'Sus')
+    ?.replace('Sus2', 'Sus')
+    || undefined;
+
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="text-2xl font-semibold text-white mb-2 font-old-standard italic">{midiDevice}</div>
       <div className="relative">
         <svg width="850" height="330" viewBox="-520 0 1040 300">
-          <Dial />
+          <Dial activeChordType={activeChordType} />
           <g>
             {/* Table header - always shown */}
             <text x="0" y="-40" textAnchor="start" fill="#666" fontSize="12">Chord</text>
