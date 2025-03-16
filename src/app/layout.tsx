@@ -4,7 +4,6 @@ import { GeistSans } from "geist/font/sans";
 import { Old_Standard_TT } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Inter } from "next/font/google";
-import Footer from "./_components/Footer";
 import Navigation from "./_components/Navigation";
 
 import { TRPCReactProvider } from "~/trpc/react";
@@ -21,7 +20,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Orchid Visualizer",
   description: "A piano learning app",
-  metadataBase: new URL("https://orchid-voicing.vercel.app"),
+  metadataBase: new URL("https://orchid.synthsonic.app"),
   authors: [{ name: "Orchid" }],
   openGraph: {
     title: "Orchid Visualizer",
@@ -62,7 +61,6 @@ export default function RootLayout({
           {children}
         </TRPCReactProvider>
         <Analytics />
-        <Footer />
       </body>
     </html>
   );
