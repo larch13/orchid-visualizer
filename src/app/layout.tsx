@@ -25,7 +25,7 @@ export const metadata = {
   openGraph: {
     title: "Orchid Visualizer",
     description:
-      "An interactive MIDI piano keyboard for exploring chord voicings and harmonies. Connect your MIDI device and start playing!",
+      "A tool to explore and understand the Telepathic Instruments Orchid with real-time chord analysis and voicing insights!",
     type: "website",
     siteName: "Orchid Visualizer",
     locale: "en_US",
@@ -34,7 +34,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Orchid Visualizer",
     description:
-      "An interactive MIDI piano keyboard for exploring chord voicings and harmonies. Connect your MIDI device and start playing!",
+      "A tool to explore and understand the Telepathic Instruments Orchid with real-time chord analysis and voicing insights!",
   },
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
