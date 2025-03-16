@@ -403,7 +403,7 @@ export const getChordNotes = (
   voicing: number | undefined,
   quality: "Maj" | "Min" | "Dim" | "Sus",
 ): string => {
-  if (voicing === undefined || voicing === null) return "-";
+  if (voicing === undefined || voicing === null) return "";
 
   // Find the base note index in the chromatic scale
   const baseNoteIndex = BASE_NOTES.indexOf(baseNote as NoteName);
