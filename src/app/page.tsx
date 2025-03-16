@@ -1,4 +1,5 @@
 import { PianoKeyboard } from "./_components/PianoKeyboard";
+import { TroubleshootingTip } from "./_components/TroubleshootingTip";
 import { HydrateClient } from "~/trpc/server";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
             <PianoKeyboard />
           </div>
         </div>
+        <TroubleshootingTip />
       </main>
     </HydrateClient>
   );
