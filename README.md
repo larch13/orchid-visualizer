@@ -84,8 +84,8 @@ If you prefer not to use Docker, you can set up the project directly on your sys
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/orchid.git
-cd orchid
+git clone https://github.com/yourusername/orchid-visualizer.git
+cd orchid-visualizer
 ```
 
 2. Install dependencies
