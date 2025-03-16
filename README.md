@@ -39,10 +39,48 @@ Offers a separate view where users can explore all voicing numbers used by the s
 
 ## 📋 Prerequisites
 
-- Node.js 18.x or later
-- npm 10.x or later
+- Docker (recommended)
+- Node.js 18.x or later (alternative)
+- npm 10.x or later (alternative)
 
-## 🛠️ Installation
+## 🛠️ Getting Started
+
+### 🐳 Docker Development (Recommended)
+
+We recommend using Docker for development to ensure a consistent environment across all platforms:
+
+1. Clone the repository
+```bash
+git clone https://github.com/SynthSonic/orchid-visualizer.git
+cd orchid
+```
+
+2. Build and start the Docker container
+```bash
+docker-compose up
+```
+
+The application will be available at `http://localhost:3000`. Any changes to your code will automatically be reflected in real-time thanks to the configured hot reloading.
+
+To stop the container:
+```bash
+docker-compose down
+```
+
+#### Docker Commands
+
+```bash
+docker-compose up            # Start the development environment
+docker-compose up --build    # Rebuild and start (use after package.json changes)
+docker-compose down          # Stop the development environment
+docker exec -it orchid-visualizer npm run lint        # Run linting inside the container
+docker exec -it orchid-visualizer npm run typecheck   # Run type checking inside the container
+docker exec -it orchid-visualizer npm run format:check   # Run type checking inside the container
+```
+
+### Alternative: Standard Installation
+
+If you prefer not to use Docker, you can set up the project directly on your system:
 
 1. Clone the repository
 ```bash

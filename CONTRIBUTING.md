@@ -11,7 +11,7 @@ By participating in this project, you agree to abide by our Code of Conduct (we 
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/your-username/orchid.git
+   git clone https://github.com/SynthSonic/orchid-visualizer.git
    cd orchid
    ```
 3. Create a new branch for your feature or fix:
@@ -20,13 +20,34 @@ By participating in this project, you agree to abide by our Code of Conduct (we 
    # or
    git checkout -b fix/your-fix-name
    ```
+
 4. Set up your development environment:
+
+   ### 🐳 Docker Setup (Recommended)
+   
+   We strongly recommend using Docker for development to ensure consistency across environments:
+   ```bash
+   docker-compose up
+   ```
+   
+   This will build the Docker image and start the development server. The application will be available at http://localhost:3000. Any code changes will automatically be reflected in real-time.
+
+   ### Alternative: Standard Setup
+   
+   If you prefer not to use Docker:
    ```bash
    npm install
-   
+   npm run dev
    ```
+
 5. Make your changes and ensure they follow our coding standards:
    ```bash
+   # If using Docker (recommended):
+   docker exec -it orchid-visualizer npm run format:write
+   docker exec -it orchid-visualizer npm run lint:fix
+   docker exec -it orchid-visualizer npm run typecheck
+   
+   # If using standard setup:
    npm run format:write  # Format code
    npm run lint:fix      # Fix linting issues
    npm run typecheck     # Check TypeScript
@@ -84,6 +105,11 @@ feat(auth): add OAuth2 authentication support
 1. Use Cursor or VSCode with our recommended extensions (listed in .vscode/extensions.json)
 2. Enable "Format on Save" in your editor for consistent code formatting
 3. Install the ESLint and Prettier extensions
+4. Docker Development Tips:
+   - All changes to the code will automatically be reflected in real-time due to volume mapping
+   - Use `docker-compose down` to stop the container
+   - Use `docker-compose up --build` when you need to rebuild the container (e.g., after package.json changes)
+   - Run commands inside the container with `docker exec -it orchid-visualizer <command>`
 
 ## Documentation
 
@@ -101,4 +127,4 @@ Join us here: [![Discord](https://img.shields.io/discord/1344898163898585138?log
 
 By contributing to the Orchid Visualizer, you agree that your contributions will be licensed under the same terms as the project (MIT License).
 
-Thank you for contributing to the Orchid Visualizer! 🌟 
+Thank you for contributing to the Orchid Visualizer! 🌟
