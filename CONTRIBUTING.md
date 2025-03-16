@@ -94,7 +94,7 @@ feat(auth): add OAuth2 authentication support
 We welcome discussions, questions, and contributions in our **Discord server**!  
 Join us here: [![Discord](https://img.shields.io/discord/1344898163898585138?logo=discord&color=5865F2)](https://discord.gg/m23GeqeS8D)
 
-🔹 **Contribution Discussion Channel:** `#decoding-orchid`  
+🔹 **Contribution Discussion Channel:** `#orchid-lab`  
 🔹 Feel free to ask questions or collaborate with other contributors!
 
 ## License
