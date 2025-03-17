@@ -19,7 +19,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Orchid Visualizer",
-  description: "A piano learning app",
+  description: "A tool to explore and understand the Telepathic Instruments Orchid with real-time chord analysis and voicing insights!",
   metadataBase: new URL("https://orchid.synthsonic.app"),
   authors: [{ name: "Orchid" }],
   openGraph: {
