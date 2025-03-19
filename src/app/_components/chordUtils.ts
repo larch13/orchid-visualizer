@@ -144,18 +144,25 @@ export const generateVoicings = (
   baseOffset: number,
   intervals: number[],
 ): number[] => {
+
+  console.log("generateing voicings");
   const voicings: number[] = [];
+  const octaves: number[] = [];
   let currentValue = baseOffset;
 
+  let currentOctave = 1;
   while (currentValue <= 60) {
     // Add each interval from the current position
     intervals.forEach((interval) => {
       const newValue = currentValue + interval;
       if (newValue <= 60) {
         voicings.push(newValue);
+        octaves.push(currentOctave);
+        console.log('pushed octave: ', currentOctave);
       }
     });
-    currentValue += 12; // Move up an octave
+    currentValue += 12; // Move up an octave // TODO octave information could be calculated here?
+    currentOctave++;
   }
 
   return voicings;
